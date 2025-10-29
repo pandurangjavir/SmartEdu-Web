@@ -1,0 +1,351 @@
+# COLLEGE SYSTEM CSE DATABASE SCHEMA
+# Database: college_system_cse
+# Generated: 2025
+
+## TABLE CREATION QUERIES
+
+-- Users Table
+CREATE TABLE users (
+    user_id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    contact_no VARCHAR(15),
+    password VARCHAR(100) NOT NULL,
+    role ENUM('admin','student') NOT NULL,
+    is_active TINYINT(1),
+    created_at DATETIME,
+    updated_at DATETIME,
+    PRIMARY KEY (user_id)
+);
+
+-- Departments Table
+CREATE TABLE departments (
+    dept_id INT NOT NULL AUTO_INCREMENT,
+    dept_name VARCHAR(100) NOT NULL,
+    dept_code VARCHAR(10) NOT NULL UNIQUE,
+    description TEXT,
+    is_active TINYINT(1),
+    created_at DATETIME,
+    PRIMARY KEY (dept_id)
+);
+
+-- Classes Table
+CREATE TABLE classes (
+    class_id INT NOT NULL AUTO_INCREMENT,
+    dept_id INT,
+    class_name VARCHAR(50) NOT NULL,
+    class_code VARCHAR(20) NOT NULL UNIQUE,
+    academic_year VARCHAR(10),
+    is_active TINYINT(1),
+    created_at DATETIME,
+    PRIMARY KEY (class_id),
+    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
+);
+
+-- Subjects Table
+CREATE TABLE subjects (
+    subject_id INT NOT NULL AUTO_INCREMENT,
+    class_id INT NOT NULL,
+    subject_name VARCHAR(100) NOT NULL,
+    subject_code VARCHAR(20) NOT NULL,
+    credits INT,
+    description TEXT,
+    is_active TINYINT(1),
+    created_at DATETIME,
+    PRIMARY KEY (subject_id),
+    FOREIGN KEY (class_id) REFERENCES classes(class_id)
+);
+
+-- Students Table
+CREATE TABLE students (
+    student_id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL UNIQUE,
+    roll_no VARCHAR(20) NOT NULL UNIQUE,
+    class_id INT NOT NULL,
+    admission_year INT NOT NULL,
+    admission_date DATE,
+    guardian_name VARCHAR(100),
+    guardian_contact VARCHAR(15),
+    address TEXT,
+    is_active TINYINT(1),
+    created_at DATETIME,
+    PRIMARY KEY (student_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (class_id) REFERENCES classes(class_id)
+);
+
+-- Marks Table
+CREATE TABLE marks (
+    mark_id INT NOT NULL AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    total_marks INT,
+    obtained_marks INT,
+    grade VARCHAR(2),
+    remarks TEXT,
+    exam_date DATE,
+    created_at DATETIME,
+    updated_at DATETIME,
+    total_percentage DECIMAL(5,2) DEFAULT 0.00,
+    PRIMARY KEY (mark_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
+);
+
+-- Attendance Table
+CREATE TABLE attendance (
+    attendance_id INT NOT NULL AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    present_count INT,
+    absent_count INT,
+    late_count INT,
+    total_classes INT,
+    attendance_percentage DECIMAL(5,2),
+    academic_year VARCHAR(10),
+    updated_at DATETIME,
+    PRIMARY KEY (attendance_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
+);
+
+-- Fees Table
+CREATE TABLE fees (
+    fee_id INT NOT NULL AUTO_INCREMENT,
+    student_id INT NOT NULL UNIQUE,
+    total_amount DECIMAL(10,2),
+    paid_amount DECIMAL(10,2),
+    due_amount DECIMAL(10,2),
+    payment_status ENUM('Paid','Partial','Unpaid'),
+    last_payment_date DATE,
+    created_at DATETIME,
+    updated_at DATETIME,
+    PRIMARY KEY (fee_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id)
+);
+
+-- Events Table
+CREATE TABLE events (
+    event_id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    event_date DATE NOT NULL,
+    event_time TIME,
+    location VARCHAR(200),
+    event_type ENUM('workshop','seminar','conference','cultural','sports','academic'),
+    max_participants INT,
+    current_participants INT,
+    organized_by VARCHAR(100),
+    is_active TINYINT(1),
+    created_at DATETIME,
+    PRIMARY KEY (event_id)
+);
+
+-- Announcements Table
+CREATE TABLE announcements (
+    announcement_id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    target ENUM('all','class','dept','student'),
+    target_id INT,
+    priority ENUM('low','normal','high','urgent'),
+    is_active TINYINT(1),
+    created_at DATETIME,
+    expires_at DATETIME,
+    PRIMARY KEY (announcement_id)
+);
+
+-- Notifications Table
+CREATE TABLE notifications (
+    notification_id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    type ENUM('info','warning','success','error'),
+    is_read TINYINT(1),
+    created_at DATETIME,
+    PRIMARY KEY (notification_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Courses Table
+CREATE TABLE courses (
+    course_id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    duration_weeks INT,
+    difficulty_level ENUM('Beginner','Intermediate','Advanced'),
+    is_active TINYINT(1),
+    created_at DATETIME,
+    PRIMARY KEY (course_id)
+);
+
+-- Chat Messages Table
+CREATE TABLE chat_messages (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    message TEXT NOT NULL,
+    response TEXT,
+    intent VARCHAR(100),
+    confidence FLOAT,
+    sentiment_polarity FLOAT,
+    sentiment_label VARCHAR(20),
+    has_empathetic_prefix TINYINT(1),
+    timestamp DATETIME,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+## SAMPLE DATA QUERIES
+
+-- Insert Departments
+INSERT INTO departments (dept_name, dept_code, description, is_active, created_at) VALUES
+('Computer Science and Engineering', 'CSE', 'Computer Science and Engineering Department', 1, NOW()),
+('Electronics and Communication', 'ECE', 'Electronics and Communication Engineering Department', 1, NOW()),
+('Mechanical Engineering', 'ME', 'Mechanical Engineering Department', 1, NOW());
+
+-- Insert Classes
+INSERT INTO classes (dept_id, class_name, class_code, academic_year, is_active, created_at) VALUES
+(1, 'First Year', 'FY', '2024-25', 1, NOW()),
+(1, 'Second Year CSE', 'SY-CSE', '2024-25', 1, NOW()),
+(1, 'Third Year CSE', 'TY-CSE', '2024-25', 1, NOW()),
+(1, 'Final Year CSE', 'Final-CSE', '2024-25', 1, NOW());
+
+-- Insert Subjects for SY-CSE
+INSERT INTO subjects (class_id, subject_name, subject_code, credits, description, is_active, created_at) VALUES
+(2, 'Data Structures', 'DS', 4, 'Fundamentals of data structures and algorithms', 1, NOW()),
+(2, 'Computer Networks', 'CN', 4, 'Computer networking concepts and protocols', 1, NOW()),
+(2, 'Database Management Systems', 'DBMS', 4, 'Database design and management', 1, NOW()),
+(2, 'Operating Systems', 'OS', 4, 'Operating system concepts and design', 1, NOW()),
+(2, 'Discrete Mathematics', 'DM', 3, 'Mathematical foundations for computer science', 1, NOW());
+
+-- Insert Subjects for TY-CSE
+INSERT INTO subjects (class_id, subject_name, subject_code, credits, description, is_active, created_at) VALUES
+(3, 'Software Engineering', 'SE', 4, 'Software development lifecycle and methodologies', 1, NOW()),
+(3, 'Web Technologies', 'WT', 4, 'Web development technologies and frameworks', 1, NOW()),
+(3, 'Theory of Computation', 'TOC', 3, 'Computational theory and automata', 1, NOW()),
+(3, 'Computer Organization', 'CO', 4, 'Computer architecture and organization', 1, NOW()),
+(3, 'Artificial Intelligence', 'AI', 4, 'AI concepts and machine learning', 1, NOW());
+
+-- Insert Subjects for Final-CSE
+INSERT INTO subjects (class_id, subject_name, subject_code, credits, description, is_active, created_at) VALUES
+(4, 'Machine Learning', 'ML', 4, 'Machine learning algorithms and applications', 1, NOW()),
+(4, 'Cloud Computing', 'CC', 4, 'Cloud computing concepts and services', 1, NOW()),
+(4, 'Big Data Analytics', 'BDA', 4, 'Big data processing and analytics', 1, NOW()),
+(4, 'Cyber Security', 'CS', 4, 'Cybersecurity principles and practices', 1, NOW()),
+(4, 'Blockchain Technology', 'BT', 4, 'Blockchain concepts and applications', 1, NOW());
+
+## USEFUL QUERY EXAMPLES
+
+-- Get all students with their class and department
+SELECT s.roll_no, u.name, c.class_name, d.dept_name
+FROM students s
+JOIN users u ON s.user_id = u.user_id
+JOIN classes c ON s.class_id = c.class_id
+JOIN departments d ON c.dept_id = d.dept_id;
+
+-- Get marks for a specific student
+SELECT s.roll_no, u.name, sub.subject_name, m.obtained_marks, m.total_marks, m.total_percentage
+FROM marks m
+JOIN students s ON m.student_id = s.student_id
+JOIN users u ON s.user_id = u.user_id
+JOIN subjects sub ON m.subject_id = sub.subject_id
+WHERE s.roll_no = 'SY-CSE-001';
+
+-- Get attendance summary for a class
+SELECT s.roll_no, u.name, 
+       SUM(a.present_count) as total_present,
+       SUM(a.total_classes) as total_classes,
+       ROUND((SUM(a.present_count) / SUM(a.total_classes)) * 100, 2) as attendance_percentage
+FROM attendance a
+JOIN students s ON a.student_id = s.student_id
+JOIN users u ON s.user_id = u.user_id
+JOIN classes c ON s.class_id = c.class_id
+WHERE c.class_name = 'SY-CSE'
+GROUP BY s.student_id, s.roll_no, u.name;
+
+-- Get fees status for all students
+SELECT s.roll_no, u.name, f.total_amount, f.paid_amount, f.due_amount, f.payment_status
+FROM fees f
+JOIN students s ON f.student_id = s.student_id
+JOIN users u ON s.user_id = u.user_id;
+
+-- Get subject-wise marks for a class
+SELECT s.roll_no, u.name,
+       MAX(CASE WHEN sub.subject_name = 'Data Structures' THEN m.obtained_marks END) as DS,
+       MAX(CASE WHEN sub.subject_name = 'Computer Networks' THEN m.obtained_marks END) as CN,
+       MAX(CASE WHEN sub.subject_name = 'Database Management Systems' THEN m.obtained_marks END) as DBMS,
+       MAX(CASE WHEN sub.subject_name = 'Operating Systems' THEN m.obtained_marks END) as OS,
+       MAX(CASE WHEN sub.subject_name = 'Discrete Mathematics' THEN m.obtained_marks END) as DM
+FROM students s
+JOIN users u ON s.user_id = u.user_id
+JOIN classes c ON s.class_id = c.class_id
+LEFT JOIN marks m ON s.student_id = m.student_id
+LEFT JOIN subjects sub ON m.subject_id = sub.subject_id
+WHERE c.class_name = 'SY-CSE'
+GROUP BY s.student_id, s.roll_no, u.name;
+
+-- Get recent announcements
+SELECT title, message, priority, created_at
+FROM announcements
+WHERE is_active = 1 AND (expires_at IS NULL OR expires_at > NOW())
+ORDER BY created_at DESC;
+
+-- Get unread notifications for a user
+SELECT notification_id, title, message, type, created_at
+FROM notifications
+WHERE user_id = 1 AND is_read = 0
+ORDER BY created_at DESC;
+
+-- Get upcoming events
+SELECT title, description, event_date, event_time, location, event_type
+FROM events
+WHERE is_active = 1 AND event_date >= CURDATE()
+ORDER BY event_date ASC;
+
+## INDEXES FOR PERFORMANCE
+
+-- Indexes for frequently queried columns
+CREATE INDEX idx_students_roll_no ON students(roll_no);
+CREATE INDEX idx_students_class_id ON students(class_id);
+CREATE INDEX idx_marks_student_id ON marks(student_id);
+CREATE INDEX idx_marks_subject_id ON marks(subject_id);
+CREATE INDEX idx_attendance_student_id ON attendance(student_id);
+CREATE INDEX idx_attendance_subject_id ON attendance(subject_id);
+CREATE INDEX idx_fees_student_id ON fees(student_id);
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_announcements_active ON announcements(is_active);
+CREATE INDEX idx_events_date ON events(event_date);
+
+## VIEWS FOR COMMON QUERIES
+
+-- Student details view
+CREATE VIEW student_details AS
+SELECT s.student_id, s.roll_no, u.name, u.email, u.contact_no,
+       c.class_name, d.dept_name, s.admission_year, s.admission_date
+FROM students s
+JOIN users u ON s.user_id = u.user_id
+JOIN classes c ON s.class_id = c.class_id
+JOIN departments d ON c.dept_id = d.dept_id;
+
+-- Marks summary view
+CREATE VIEW marks_summary AS
+SELECT s.roll_no, u.name, c.class_name,
+       sub.subject_name, m.obtained_marks, m.total_marks,
+       ROUND((m.obtained_marks / m.total_marks) * 100, 2) as percentage
+FROM marks m
+JOIN students s ON m.student_id = s.student_id
+JOIN users u ON s.user_id = u.user_id
+JOIN classes c ON s.class_id = c.class_id
+JOIN subjects sub ON m.subject_id = sub.subject_id;
+
+-- Attendance summary view
+CREATE VIEW attendance_summary AS
+SELECT s.roll_no, u.name, c.class_name,
+       sub.subject_name, a.present_count, a.total_classes,
+       ROUND((a.present_count / a.total_classes) * 100, 2) as attendance_percentage
+FROM attendance a
+JOIN students s ON a.student_id = s.student_id
+JOIN users u ON s.user_id = u.user_id
+JOIN classes c ON s.class_id = c.class_id
+JOIN subjects sub ON a.subject_id = sub.subject_id;

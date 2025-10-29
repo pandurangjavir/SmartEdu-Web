@@ -1,0 +1,16 @@
+version: "3.1"
+intents:
+  - greet
+  - fee_query
+  - attendance_query
+  - event_query
+
+responses:
+  utter_greet:
+  - text: "Hello! How can I help you today?"
+  utter_fee:
+  - text: "Here are your fee details:"
+  utter_attendance:
+  - text: "Here is your attendance information:"
+  utter_event:
+  - text: "Here are the upcoming events:"
